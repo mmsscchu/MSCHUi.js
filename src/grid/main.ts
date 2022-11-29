@@ -1,7 +1,7 @@
 import {LogOptions} from "../log/setting/logOptions";
-import LoggerManager from "../log/loggerManager";
+import LogManager from "../log/logManager";
 
-export default class Grid{
+export default class MSCHUiGrid{
     private static _defaultOptions: LogOptions = {
         level : 'INFO',
         color : false,

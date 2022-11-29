@@ -6,7 +6,7 @@ import ConsoleAppender from "./appender/consoleAppender";
 import FileAppender from "./appender/fileAppender";
 import PrintAppender from "./appender/printAppender";
 
-export default class Logger{
+export default class Log {
     private loggerName : string
     private loggerOption : LogOptions;
     private loggerAppenderOption : LogAppenderOption

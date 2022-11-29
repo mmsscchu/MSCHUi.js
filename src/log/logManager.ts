@@ -1,8 +1,8 @@
-import Logger from "./logger";
+import Log from "./log";
 import {LogOptions} from "./setting/logOptions";
 
-export default class LoggerManager{
-    private _loggers = {} as {key: string, logger: Logger}
+export default class LogManager {
+    private _loggers = {} as {key: string, logger: Log}
 
     constructor() {
 
@@ -11,7 +11,7 @@ export default class LoggerManager{
         loggerName = this.loggerNameValidate(loggerName);
         let logger = this._loggers[loggerName]
         if(!logger){
-            logger = this._loggers[loggerName] = new Logger(loggerName, options)
+            logger = this._loggers[loggerName] = new Log(loggerName, options)
         }
         return logger;
     }

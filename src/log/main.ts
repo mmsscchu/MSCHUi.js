@@ -1,8 +1,7 @@
-import Logger from "./logger";
-import LoggerManager from "./loggerManager";
+import LogManager from "./logManager";
 import {LogOptions} from "./setting/logOptions";
 
-export default class Log{
+export default class MSCHUiLog{
     private _defaultOptions: LogOptions = {
         level : 'INFO',
         color : false,
@@ -13,7 +12,7 @@ export default class Log{
             }
         }
     }
-    private _loggerManager = new LoggerManager();
+    private _loggerManager = new LogManager();
 
     getLogger(loggerName? : string, options? : LogOptions){
         options = Object.assign(this._defaultOptions, options);
