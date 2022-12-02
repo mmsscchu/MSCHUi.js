@@ -1,7 +1,7 @@
 class LogOptions{
-    public level: string;
-    public color: boolean
-    public appender : LogAppenderOption
+    level: string;
+    color: boolean
+    appender : LogAppenderOption
 }
 abstract class LogAppenderOption{
     file? : FileAppenderOption

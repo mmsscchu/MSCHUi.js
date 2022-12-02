@@ -3,14 +3,28 @@ import GlobalVariable from "../common/globalVariable";
 import Util from "../common/util";
 
 export default class Grid{
-    private gridName : string
-    private gridOption : any
+    static CLASSNAME = {
+        area : {
+            container : `${GlobalVariable.GRID_PREFIX}-container`,
+            content : `${GlobalVariable.GRID_PREFIX}-content`,
+            pagination : `${GlobalVariable.GRID_PREFIX}-pagination`,
+            scroll : `${GlobalVariable.GRID_PREFIX}-scroll`,
+        }
+    }
+    private gridOption : GridOptions
 
     private gridTable;
     private gridDatasetName;
 
-    constructor(gridName : string, gridOption : GridOptions) {
-        this.gridName = gridName
+    private gridElement = {
+        area : {
+            container : null,
+            content : null,
+            pagination : null,
+            scroll : null
+        },
+    }
+    constructor(gridOption : GridOptions) {
         this.gridOption = gridOption
         this.gridDatasetName = `${GlobalVariable.GRID_DATASET_NAME}`//-${Util.random()}`
         this.create();
@@ -22,8 +36,21 @@ export default class Grid{
         }
     }
     private parse(){}
-    public create(){
+
+    private create(){
         let fragment = document.createDocumentFragment();
+        let target = this.gridOption.
+        let area = this.gridElement.area;
+
+        area.container = document.createElement('div')
+        area.content = document.createElement('div');
+        area.pagination = document.createElement('div');
+        area.scroll = document.createElement('div');
+
+        area.container.appendChild(area.content)
+        area.container.appendChild(area.pagination)
+        area.container.appendChild(area.scroll)
+
         let table = document.createElement('table');
 
         this.gridTable = table;
@@ -35,6 +62,7 @@ export default class Grid{
     public destroy(){
         let fragment = document.createDocumentFragment();
     }
+
     public refresh(){}
 
     private createRow(){}

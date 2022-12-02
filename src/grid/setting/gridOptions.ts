@@ -1,30 +1,31 @@
 class GridOptions{
-    public container : Element | string;
-    public id : string;
-    public rows : {
-        headHeight? : 25, /* table head row height */
-        bodyHeight? : 25, /* table body row height */
+    container : Element | string;
+    id? : string;
+    rows? : {
+        headHeight? : number, /* table head row height */
+        bodyHeight? : number, /* table body row height */
     }
-    public columns : [
-        {
-            title : string,
-            ref? : string,
-            style? : string,
-
-            width? : string | number,
-
-            resizable? : boolean,
-            sortable? : boolean,
-            draggable? : boolean,
-
-            prefix? : string,
-            suffix? : string,
-            format? : Function
-        }
+    columns? : [
+        column?: GridOptionColumn
     ];
-    public pagination? : {
+    pagination? : {
         rowCount? : number,
     }
-    public data? : []
+    data? : []
+}
+class GridOptionColumn{
+    title? : string
+    ref : string
+    style? : string
+
+    width? : string | number
+
+    resizable? : boolean
+    sortable? : boolean
+    draggable? : boolean
+
+    prefix? : string
+    suffix? : string
+    format? : Function
 }
 export {GridOptions}

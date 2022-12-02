@@ -2,11 +2,13 @@ import Grid from "./grid/main";
 import Log from "./log/main";
 
 class MSCHUi{
-    public Grid;
-    public Log;
+    public grid;
+    public log;
+
     constructor() {
-        this.Grid = new Grid();
-        this.Log = new Log();
+        this.grid = new Grid();
+        this.log = new Log();
     }
+
 }
 export default new MSCHUi()
