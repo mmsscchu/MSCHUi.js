@@ -1,5 +1,5 @@
 class GridOptions{
-    container : Element | string;
+    container : Element;
     id? : string;
     rows? : {
         headHeight? : number, /* table head row height */
@@ -15,10 +15,12 @@ class GridOptions{
 }
 class GridOptionColumn{
     title? : string
+    caption? : string
+    width? : string | number
+
     ref : string
     style? : string
 
-    width? : string | number
 
     resizable? : boolean
     sortable? : boolean
@@ -26,6 +28,6 @@ class GridOptionColumn{
 
     prefix? : string
     suffix? : string
-    format? : Function
+    custom? : Function
 }
 export {GridOptions}

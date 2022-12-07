@@ -3,7 +3,33 @@
 <head></head>
 <script>
     window.onload = function(){
-        MSCHUi.Grid.create(document.body);
+        let grid = MSCHUi.grid.create(document.body, {
+            columns : [
+                {title : '컬럼1', ref : 'A', width: 50, caption : 'caption1'},
+                {title : '컬럼2', ref : 'B',},
+                {title : '컬럼3', ref : 'C',},
+                {title : '컬럼4', ref : 'D'},
+                {title : '컬럼5', ref : 'E'},
+            ],
+            data : [
+                {'A' : 1,'B' : 2,'C' : 3,'D' : 4,'E' : 5},
+                {'A' : 1,'B' : 2,'C' : 3,'D' : 4,'E' : 5},
+                {'A' : 1,'B' : 2,'C' : 3,'D' : 4,'E' : 5},
+                {'A' : 1,'B' : 2,'C' : 3,'D' : 4,'E' : 5},
+                {'A' : 1,'B' : 2,'C' : 3,'D' : 4,'E' : 5},
+                {'A' : 1,'B' : 2,'C' : 3,'D' : 4,'E' : 5},
+
+            ]
+        });
+        setTimeout(()=>{
+            grid.setOptions({
+                columns : [
+                    {title : '컬럼1', ref : 'A', width: 50, caption : 'caption1'},
+                    {title : '컬럼2', ref : 'B'}
+                ]
+            })
+        },2000)
+
     }
 
 

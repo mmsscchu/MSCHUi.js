@@ -1,16 +1,21 @@
 import {GridOptions} from "./setting/gridOptions";
 import GlobalVariable from "../common/globalVariable";
 import Util from "../common/util";
+import "./style.css";
+import Table from "./component/table";
 
 export default class Grid{
-    static CLASSNAME = {
+    private gridClassNames = {
         area : {
             container : `${GlobalVariable.GRID_PREFIX}-container`,
-            content : `${GlobalVariable.GRID_PREFIX}-content`,
             pagination : `${GlobalVariable.GRID_PREFIX}-pagination`,
             scroll : `${GlobalVariable.GRID_PREFIX}-scroll`,
+        },
+        content : {
+
         }
     }
+
     private gridOption : GridOptions
 
     private gridTable;
@@ -28,6 +33,20 @@ export default class Grid{
         this.gridOption = gridOption
         this.gridDatasetName = `${GlobalVariable.GRID_DATASET_NAME}`//-${Util.random()}`
         this.create();
+
+        for(let key in this.gridOption){
+            Object.defineProperty(this.gridOption, key, {
+                get() {
+                    return this[key];
+                },
+                set(newValue) {
+                    if(this[key] !== newValue){
+                        console.log(key, this[key]+ '->' + newValue, 'changed');
+                    }
+                    this[key] = newValue;
+                }
+            })
+        }
     }
 
     private validate(){
@@ -38,27 +57,31 @@ export default class Grid{
     private parse(){}
 
     private create(){
+        let tableArea = new Table(this.gridOption);
+
         let fragment = document.createDocumentFragment();
-        let target = this.gridOption.
+        let target = this.gridOption.container
         let area = this.gridElement.area;
 
         area.container = document.createElement('div')
-        area.content = document.createElement('div');
         area.pagination = document.createElement('div');
         area.scroll = document.createElement('div');
 
-        area.container.appendChild(area.content)
+        area.container.className = this.gridClassNames.area.container;
+        area.pagination.className = this.gridClassNames.area.pagination;
+        area.scroll.className = this.gridClassNames.area.scroll;
+
+        area.container.appendChild(tableArea.getElement())
         area.container.appendChild(area.pagination)
         area.container.appendChild(area.scroll)
 
-        let table = document.createElement('table');
+        target.appendChild(area.container);
 
-        this.gridTable = table;
-
-        document.body.appendChild(table);
-
-        Util.sign(table)
+        Util.sign(area.container)
     }
+
+
+
     public destroy(){
         let fragment = document.createDocumentFragment();
     }
@@ -73,5 +96,7 @@ export default class Grid{
 
     getGrids(){}
 
-
+    public setOptions(options: GridOptions){
+        this.gridOption = Object.assign(this.gridOption, options);
+    }
 }

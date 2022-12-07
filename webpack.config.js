@@ -1,5 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 module.exports = {
     entry: "./src/index.ts", // 번들링 시작 위치
@@ -26,6 +27,24 @@ module.exports = {
                     loader: "ts-loader",
                 },
             },
+            {
+                test: /\.css$/i,
+                exclude: /\.module\.css$/i, // 모듈 파일 제외 설정
+                use: ['style-loader', 'css-loader'],
+            },
+            // CSS Module ([filename].module.css)
+            {
+                test: /\.module\.css$/i,
+                use: [
+                    'style-loader',
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            modules: true,
+                        },
+                    },
+                ],
+            }
         ],
     },
     resolve: {
@@ -35,6 +54,10 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
             template: "./src/index.html", // 템플릿 위치
+        }),
+        new MiniCssExtractPlugin({
+            filename: 'assets/css/[name].[contenthash:8].css',
+            chunkFilename: 'assets/css/[name].[contenthash:8].chunk.css',
         }),
     ],
     devServer: {

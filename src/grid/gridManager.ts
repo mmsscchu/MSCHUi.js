@@ -6,6 +6,7 @@ export default class GridManager{
 
     constructor() {
     }
+
     create(options? : GridOptions){
         let grid = this._grids[options.id];
         if(!grid){

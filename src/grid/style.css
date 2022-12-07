@@ -1,0 +1,44 @@
+div.mschui-grid-container{
+    font-size: 12px;
+}
+div.mschui-grid-table table {
+    width: 100%;
+    border: 1px solid #444444;
+    border-collapse: collapse;
+}
+div.mschui-grid-table th, div.mschui-grid-table td {
+    border: 1px solid #444444;
+}
+
+th.mschui-grid-content-head{
+    position:relative;
+}
+span.mschui-grid-content-head-title{
+
+}
+div.mschui-grid-content-head-caption{
+    display: none;
+}
+div.mschui-grid-content-head-caption.is-show{
+    display: block;
+    position: absolute;
+    top: 80%;
+    left: 50%;
+    width:120px;
+    height:80px;
+    line-height:80px;
+    padding: 5px;
+    background:yellow;
+    font-size:24px;
+    border:1px solid blue;
+    color:blue;
+    text-align:center;
+}
+div.mschui-grid-content-head-resize{
+    position:absolute;
+    top:0;
+    right:0;
+    cursor: col-resize;
+    width : 2px;
+    height: 100%;
+}

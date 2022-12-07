@@ -15,7 +15,6 @@ export default class MSCHUiGrid{
             bodyHeight : 25
         },
         columns : [],
-
         pagination : {
             rowCount : 10
         }
@@ -27,26 +26,25 @@ export default class MSCHUiGrid{
     }
     create(container: string | Element, options? : GridOptions){
         options = Object.assign(this._defaultOptions, options);
-        options = this.requireOptionCheck(options);
+        options = this.requireOptionCheck(container, options);
 
         return this._gridManager.create(options);
     }
 
-    private requireOptionCheck(options){
-        if(!options.container){
+    private requireOptionCheck(container, options){
+       /* if(!options.container){
             throw new Error('require option : container is null')
         }else{
-            let container;
-            if(typeof options.container === 'string'){
-                container = document.querySelector(options.container)
-            }else if(typeof options.container === "object" && options.container instanceof HTMLElement){
-                container = options.container
-            }else{
-                throw new Error('require option container is unknown')
-            }
 
-            options.container = container;
+        }*/
+        if(typeof options.container === 'string'){
+            options.container = document.querySelector(container)
+        }else if(typeof container === "object" && container instanceof HTMLElement){
+            options.container = container
+        }else{
+            throw new Error('require option container is unknown')
         }
+
         if(options.columns.length > 0){
             let columns = options.columns;
             for(let i=0;i<columns.length;i++){
@@ -61,8 +59,5 @@ export default class MSCHUiGrid{
             options.id = `${GlobalVariable.GRID_PREFIX}_${Util.random()}`;
         }
         return options;
-    }
-    setOptions(options: object){
-        this._defaultOptions = Object.assign(this._defaultOptions, options);
     }
 }
