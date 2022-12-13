@@ -37,8 +37,11 @@ div.mschui-grid-content-head-caption.is-show{
 div.mschui-grid-content-head-resize{
     position:absolute;
     top:0;
-    right:0;
+    right: -3px;
     cursor: col-resize;
-    width : 2px;
+    width : 5px;
     height: 100%;
+}
+div.mschui-grid-content-head-resize.active{
+    background-color: aqua;
 }

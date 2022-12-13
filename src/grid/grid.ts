@@ -2,7 +2,8 @@ import {GridOptions} from "./setting/gridOptions";
 import GlobalVariable from "../common/globalVariable";
 import Util from "../common/util";
 import "./style.css";
-import Table from "./component/table";
+import GridTable from "./component/gridTable";
+import GridEvent from "./gridEvent";
 
 export default class Grid{
     private gridClassNames = {
@@ -16,12 +17,14 @@ export default class Grid{
         }
     }
 
-    private gridOption : GridOptions
+    public options : GridOptions
+    private event: GridEvent;
+    private table: GridTable;
 
     private gridTable;
     private gridDatasetName;
 
-    private gridElement = {
+    private elements = {
         area : {
             container : null,
             content : null,
@@ -29,39 +32,56 @@ export default class Grid{
             scroll : null
         },
     }
+
     constructor(gridOption : GridOptions) {
-        this.gridOption = gridOption
+        const _SELF = this;
+
+        this.event = new GridEvent();
+
+        this.options = new Proxy(
+            gridOption,
+            {
+                get(target, key, receiver) {
+                    const res = Reflect.get(target, key, receiver);
+                    // track(target, key);
+
+                    return res;
+                },
+                set(target, key, value, receiver) {
+                    const oldValue = target[key];
+                    const res = Reflect.set(target, key, value, receiver);
+
+                    if (oldValue !== res) {
+                        _SELF.event.CALL_OPTIONS_CHANGE(res)
+                        // trigger(target, key, value, oldValue);
+                    }
+                    return res;
+                }
+            }
+        )
+        _SELF.event.CALL_OPTIONS_BIND(this.options);
+
         this.gridDatasetName = `${GlobalVariable.GRID_DATASET_NAME}`//-${Util.random()}`
+
         this.create();
 
-        for(let key in this.gridOption){
-            Object.defineProperty(this.gridOption, key, {
-                get() {
-                    return this[key];
-                },
-                set(newValue) {
-                    if(this[key] !== newValue){
-                        console.log(key, this[key]+ '->' + newValue, 'changed');
-                    }
-                    this[key] = newValue;
-                }
-            })
-        }
+        console.log(this.options)
+
     }
 
     private validate(){
-        if(!this.gridOption.container){
+        if(!this.options.container){
             throw new Error('\'container\' option is required')
         }
     }
     private parse(){}
 
     private create(){
-        let tableArea = new Table(this.gridOption);
+        this.table = new GridTable(this.options);
 
         let fragment = document.createDocumentFragment();
-        let target = this.gridOption.container
-        let area = this.gridElement.area;
+        let target = this.options.container
+        let area = this.elements.area;
 
         area.container = document.createElement('div')
         area.pagination = document.createElement('div');
@@ -71,13 +91,15 @@ export default class Grid{
         area.pagination.className = this.gridClassNames.area.pagination;
         area.scroll.className = this.gridClassNames.area.scroll;
 
-        area.container.appendChild(tableArea.getElement())
+        area.container.appendChild(this.table.element)
         area.container.appendChild(area.pagination)
         area.container.appendChild(area.scroll)
 
         target.appendChild(area.container);
 
         Util.sign(area.container)
+
+        this.event.CALL_GRID_CREATE()
     }
 
 
@@ -97,6 +119,17 @@ export default class Grid{
     getGrids(){}
 
     public setOptions(options: GridOptions){
-        this.gridOption = Object.assign(this.gridOption, options);
+        for(let optionKey in options){
+           this.options[optionKey] = options[optionKey];
+        }
+
+        console.log(this.options)
+    }
+
+    public on(eventName, callback){
+        this.event.on(eventName, callback)
+    }
+    public off(eventName, callback){
+        this.event.off(eventName, callback)
     }
 }

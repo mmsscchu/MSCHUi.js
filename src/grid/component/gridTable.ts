@@ -1,7 +1,8 @@
 import {GridOptions} from "../setting/gridOptions";
 import GlobalVariable from "../../common/globalVariable";
+import Util from "../../common/util";
 
-export default class Table{
+export default class GridTable {
     private TABLE_CLASS_NAMES = {
         area : `${GlobalVariable.GRID_PREFIX}-table`,
         head : {
@@ -14,14 +15,19 @@ export default class Table{
 
         }
     }
-    private gridOptions: GridOptions;
-    private readonly tableElement;
+    private options: GridOptions;
+    public element;
 
-    constructor(options : GridOptions) {
+    constructor(gridOptions : GridOptions) {
+        this.options = gridOptions;
 
+        this.create()
+        this.update()
+    }
+
+    public create(){
         let area = document.createElement('div');
         let table = document.createElement('table');
-        let colgroup = document.createElement('colgroup');
         let thead = document.createElement('thead');
         let tbody = document.createElement('tbody');
 
@@ -29,11 +35,8 @@ export default class Table{
 
         let headRow = document.createElement('tr')
 
-        options.columns.forEach(columnInfo => {
-            let colColumn = document.createElement('col');
-            colColumn.setAttribute('width', this.parseColumnWidth(columnInfo.width))
-            colgroup.appendChild(colColumn);
-
+        /* options.columns */
+        this.options.columns.forEach((columnInfo, columnIndex) => {
             let ref = columnInfo.ref;
             let title = columnInfo.title ? columnInfo.title : ''
             let caption = columnInfo.caption ? columnInfo.caption : columnInfo.title
@@ -44,7 +47,8 @@ export default class Table{
             let headColumnResize = document.createElement('div');
 
             headColumn.className = this.TABLE_CLASS_NAMES.head.this;
-            headColumn.onmouseenter = function(captionElement){ // caption 발동 조건
+            headColumn.style.width = this.parseColumnWidth(columnInfo.width)
+            headColumnTitle.addEventListener('mouseenter', function(captionElement){ // caption 발동 조건
                 let enterLimitTime = 500;
                 let enterWaitTime = 0;
                 let enterWaitInterval = setInterval(()=>{
@@ -54,13 +58,16 @@ export default class Table{
                     }
                     enterWaitTime += 50;
                 },50)
-                this.onmouseleave = function(){
+                this.addEventListener('mouseleave', mouseleave)
+
+                function mouseleave(){
                     if(enterWaitInterval){
                         captionElement.classList.remove('is-show')
                         clearInterval(enterWaitInterval);
+                        this.removeEventListener('mouseleave', mouseleave);
                     }
                 }
-            }.bind(headColumn, headColumnCaption)
+            }.bind(headColumnTitle, headColumnCaption))
             headColumnCaption.onclick = function(){
 
             }.bind(headColumnResize, headColumn)
@@ -71,46 +78,62 @@ export default class Table{
             headColumnCaption.innerText = caption;
 
             headColumnResize.className = this.TABLE_CLASS_NAMES.head.resizer;
+            headColumnResize.addEventListener('mousedown', function(e){
+                this.style.height = `${Util.height(table)}px`
+                this.classList.add('active');
 
+                let th = this.closest('th');
+                // @ts-ignore
+                th.nextElementSibling.style.width = 'auto';
+
+                document.addEventListener('mousemove', mousemove)
+                document.addEventListener('mouseup', mouseup.bind(this));
+
+                function mousemove(e){
+                    let targetWidth = Util.width(th);
+                    th.style.width = `${targetWidth + e.movementX}px`;
+                }
+                function mouseup(e){
+                    this.classList.remove('active');
+                    // @ts-ignore
+                    th.nextElementSibling.style.width = `${ Util.width(th.nextElementSibling)}px`
+
+                    document.removeEventListener('mousemove', mousemove)
+                    document.removeEventListener('mouseup', mouseup.bind(this))
+                }
+            })
             headColumn.appendChild(headColumnTitle);
             headColumn.appendChild(headColumnCaption);
-            headColumn.appendChild(headColumnCaption);
+            headColumn.appendChild(headColumnResize);
 
             headRow.appendChild(headColumn);
         })
 
         thead.appendChild(headRow);
 
-        table.appendChild(colgroup);
         table.appendChild(thead)
         table.appendChild(tbody);
 
         area.appendChild(table);
 
 
-        this.gridOptions = options;
-        this.tableElement = area;
-
-        this.update()
+        this.element = area;
     }
-
-    public getElement(){
-        return this.tableElement
-    }
-
     public update(){
-        let tbody = this.tableElement.querySelector('tbody');
-        this.gridOptions.data.forEach(data =>{
-            console.log(data)
+        let tbody = this.element.querySelector('tbody');
+        this.options.data.forEach((row, rowIndex) =>{
+            console.log(row)
             let bodyRow = document.createElement('tr');
-            this.gridOptions.columns.forEach(column =>{
+            bodyRow.setAttribute('data-mschui-row-index', String(rowIndex));
 
-                let columnValue = data[column.ref];
+            this.options.columns.forEach((column, columnIndex) =>{
+
+                let columnValue = row[column.ref];
                 let bodyColumn = document.createElement('td')
                 let bodyText = document.createElement('span');
 
                 bodyColumn.appendChild(bodyText);
-
+                bodyColumn.setAttribute('data-mschui-column-index', String(columnIndex));
                 if(column.custom && typeof column.custom === 'function'){
                     let customElement = column.custom();
                     bodyColumn.replaceChild(customElement, bodyColumn.firstElementChild)
