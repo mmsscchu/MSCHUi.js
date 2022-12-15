@@ -8,6 +8,8 @@ export default class GridEvent{
 
         GRID_UPDATE : 'grid.update',
         GRID_CREATE : 'grid.create',
+        GRID_CLICK: 'grid.click',
+
     }
     constructor() {
         this.event = new Events();
@@ -26,6 +28,11 @@ export default class GridEvent{
         this.event.dispatch(this.EVENT.GRID_CREATE, data);
     }
 
+    //CLICK EVENT
+
+    public CALL_GRID_CLICK(data?){
+        this.event.dispatch(this.EVENT.GRID_CLICK, data)
+    }
 
     public on(eventName, callback){
         this.event.on(eventName, callback)

@@ -33,7 +33,25 @@ export default class GridTable {
         this.create()
         this.update()
     }
-    private _headTitle(headColumn:Element, option: GridOptionColumn, callback:Function){
+
+    private _createHeadRow(thead:Element, option: GridOptions, rowIndex: number){
+        let headRow = document.createElement('tr')
+        headRow.setAttribute(this.TABLE_DATA_NAMES.row.index, String(rowIndex));
+
+        thead.appendChild(headRow);
+
+        return headRow;
+    }
+    private _createHeadColumn(headRow:Element, option: GridOptionColumn, columnIndex: number){
+        let headColumn = document.createElement('th')
+        headColumn.setAttribute(this.TABLE_DATA_NAMES.column.index, String(columnIndex));
+        headColumn.style.width = this.parseColumnWidth(option.width)
+
+        headRow.appendChild(headColumn)
+
+        return headColumn
+    }
+    private _createHeadColumnTitle(headColumn:Element, option: GridOptionColumn, callback:Function){
         let headColumnTitle = document.createElement('span');
         headColumnTitle.className = this.TABLE_CLASS_NAMES.head.title;
         headColumnTitle.innerText = option.title;
@@ -41,7 +59,7 @@ export default class GridTable {
         headColumn.appendChild(headColumnTitle);
         return headColumn;
     }
-    private _headResizable(headColumn:Element, option: GridOptionColumn, callback:Function){
+    private _createHeadColumnResizable(headColumn:Element, option: GridOptionColumn, callback:Function){
         if(!option.resizable){
             return headColumn;
         }
@@ -77,7 +95,7 @@ export default class GridTable {
 
         return headColumn;
     }
-    private _headSortable(headColumn:Element, option: GridOptionColumn, callback:Function){
+    private _createHeadColumnSortable(headColumn:Element, option: GridOptionColumn, callback:Function){
         if(!option.sortable){
             return headColumn;
         }
@@ -104,13 +122,13 @@ export default class GridTable {
         headColumn.appendChild(headColumnSort);
         return headColumn;
     }
-    private _headTooltipable(headColumn:Element, option: GridOptionColumn, callback:Function){
+    private _createHeadColumnTooltipable(headColumn:Element, option: GridOptionColumn, callback:Function){
         if(!option.tooltipable){
             return headColumn
         }
         let headColumnTooltip = document.createElement('div');
         headColumnTooltip.className = this.TABLE_CLASS_NAMES.head.tooltip;
-        headColumnTooltip.innerText = option.tooltip;
+        headColumnTooltip.innerText = option.tooltip ? option.tooltip : option.title;
 
         headColumn.addEventListener('mouseenter', function(tooltipElement){ // caption 발동 조건
             let enterLimitTime = 500;
@@ -148,32 +166,33 @@ export default class GridTable {
         thead.className = this.TABLE_CLASS_NAMES.head.this;
         tbody.className = this.TABLE_CLASS_NAMES.body.this;
 
-        let headRow = document.createElement('tr')
-        headRow.setAttribute(this.TABLE_DATA_NAMES.row.index, String(-1));
+        table.addEventListener('click', function(e){
+            if(e.target instanceof Element){
+                let column = e.target;
+                let tagName = column.tagName;
+                if(!(tagName === 'th' || tagName === 'td')){
+                    column = column.closest('th,td')
+                }
+                let row = column.closest('tr')
+                let rowIndex = row.getAttribute(this.TABLE_DATA_NAMES.row.index)
+                let columnIndex = column.getAttribute(this.TABLE_DATA_NAMES.column.index);
+
+                console.log(rowIndex, columnIndex)
+                this.ev
+            }
+        }.bind(this))
+
+        let rowIndex = -1;
+        let headRow = this._createHeadRow(thead, this.options, rowIndex);
 
         /* options.columns */
         this.options.columns.forEach((columnOption, columnIndex) => {
-            let ref = columnOption.ref
-            let title = columnOption.title ? columnOption.title : ''
-            let caption = columnOption.tooltip ? columnOption.tooltip : columnOption.title
+            let headColumn = this._createHeadColumn(headRow, columnOption, columnIndex)
 
-            let headColumn = document.createElement('th')
-            headColumn.setAttribute(this.TABLE_DATA_NAMES.column.index, String(columnIndex));
-            headColumn.style.width = this.parseColumnWidth(columnOption.width)
-
-            this._headTitle(headColumn, columnOption, function(){
-
-            })
-            this._headResizable(headColumn, columnOption, function(){
-
-            })
-            this._headSortable(headColumn, columnOption, function(){
-
-            })
-            this._headTooltipable(headColumn, columnOption, function(){
-
-            })
-            headRow.appendChild(headColumn);
+            this._createHeadColumnTitle(headColumn, columnOption, function(){})
+            this._createHeadColumnResizable(headColumn, columnOption, function(){})
+            this._createHeadColumnSortable(headColumn, columnOption, function(){})
+            this._createHeadColumnTooltipable(headColumn, columnOption, function(){})
         })
 
         thead.appendChild(headRow);
@@ -185,6 +204,7 @@ export default class GridTable {
 
         this.element = area;
     }
+
     public update(){
         let tbody = this.element.querySelector('tbody');
         this.options.data.forEach((row, rowIndex) =>{
@@ -214,8 +234,8 @@ export default class GridTable {
             })
             tbody.appendChild(bodyRow);
         })
-
     }
+
     private parseColumnWidth(width){
         if(!width){
             return 'auto'
