@@ -15,19 +15,18 @@ class GridOptions{
 }
 class GridOptionColumn{
     title? : string
-    caption? : string
     width? : string | number
-
     ref : string
     style? : string
 
-
     resizable? : boolean
+    sort? : string
     sortable? : boolean
-    draggable? : boolean
+    tooltip? : string
+    tooltipable? :boolean
 
     prefix? : string
     suffix? : string
     custom? : Function
 }
-export {GridOptions}
+export {GridOptions, GridOptionColumn}

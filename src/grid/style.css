@@ -5,21 +5,42 @@ div.mschui-grid-table table {
     width: 100%;
     border: 1px solid #444444;
     border-collapse: collapse;
+    table-layout:fixed;
 }
 div.mschui-grid-table th, div.mschui-grid-table td {
     border: 1px solid #444444;
 }
-
-th.mschui-grid-content-head{
-    position:relative;
+div.mschui-grid-table td{
+    /*text-overflow:ellipsis;*/
 }
-span.mschui-grid-content-head-title{
+
+thead.content-head{}
+thead.content-head > tr{}
+thead.content-head > tr > th{
+    cursor: pointer;
+    position: relative;
+}
+tbody.content-body{}
+tbody.content-body > tr > td{
+    position: relative;
+}
+tbody.content-body > tr > td > span{
+    display: block;
+    word-break: break-all;
+}
+tbody.content-body > tr > td > span.ellipsis{
+    word-break: normal;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+span.content-head-title{
 
 }
-div.mschui-grid-content-head-caption{
+div.content-head-tooltip{
     display: none;
 }
-div.mschui-grid-content-head-caption.is-show{
+div.content-head-tooltip.active{
     display: block;
     position: absolute;
     top: 80%;
@@ -33,15 +54,42 @@ div.mschui-grid-content-head-caption.is-show{
     border:1px solid blue;
     color:blue;
     text-align:center;
+    z-index : 1;
 }
-div.mschui-grid-content-head-resize{
+div.content-head-resize{
     position:absolute;
     top:0;
     right: -3px;
     cursor: col-resize;
     width : 5px;
     height: 100%;
+    z-index : 2;
 }
-div.mschui-grid-content-head-resize.active{
+div.content-head-resize.active{
     background-color: aqua;
+}
+div.content-head-sort{
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translate(0, -50%);
+
+    width: 40px;
+    height: 18px;
+}
+div.content-head-sort.asc{
+    margin:auto;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 10px solid #000;
+}
+div.content-head-sort.desc{
+    margin:auto;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 10px solid #000;
 }
