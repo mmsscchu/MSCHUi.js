@@ -31,7 +31,21 @@
             })
             console.log('call');
         },2000)*/
-
+        grid.on('grid.create', function(event){
+            console.log('create', event);
+        })
+        grid.on('grid.sort', function(event){
+            console.log('sort', event);
+        })
+        grid.on('grid.click', function(event){
+            console.log('click', event);
+        })
+        grid.on('grid.column.resize', function(event){
+            console.log('column.resize', event);
+        })
+        grid.on('grid.row.resize', function(event){
+            console.log('row.resize', event);
+        })
     }
 
 

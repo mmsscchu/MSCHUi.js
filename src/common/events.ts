@@ -1,10 +1,14 @@
 export default class Events{
     private _events = {};
 
-    public dispatch(eventName, data){
+    public dispatch(eventName, event, data){
         if(this._events[eventName]){
             this._events[eventName].forEach(callback => {
-                callback(data)
+                callback({
+                    name : eventName,
+                    event : event,
+                    data : data
+                })
             })
         }
     }

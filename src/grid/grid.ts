@@ -77,7 +77,7 @@ export default class Grid{
     private parse(){}
 
     private create(){
-        this.table = new GridTable(this.options);
+        this.table = new GridTable(this.options, this.event);
 
         let fragment = document.createDocumentFragment();
         let target = this.options.container
@@ -99,7 +99,7 @@ export default class Grid{
 
         Util.sign(area.container)
 
-        this.event.CALL_GRID_CREATE()
+        this.event.CALL_GRID_CREATE(null, this)
     }
 
 

@@ -1,6 +1,7 @@
 import {GridOptionColumn, GridOptions} from "../setting/gridOptions";
 import GlobalVariable from "../../common/globalVariable";
 import Util from "../../common/util";
+import GridEvent from "../gridEvent";
 
 export default class GridTable {
     private TABLE_DATA_NAMES = {
@@ -25,10 +26,12 @@ export default class GridTable {
         }
     }
     private options: GridOptions;
+    private event : GridEvent;
     public element;
 
-    constructor(gridOptions : GridOptions) {
+    constructor(gridOptions : GridOptions, gridEvent: GridEvent) {
         this.options = gridOptions;
+        this.event = gridEvent
 
         this.create()
         this.update()
@@ -45,7 +48,7 @@ export default class GridTable {
     private _createHeadColumn(headRow:Element, option: GridOptionColumn, columnIndex: number){
         let headColumn = document.createElement('th')
         headColumn.setAttribute(this.TABLE_DATA_NAMES.column.index, String(columnIndex));
-        headColumn.style.width = this.parseColumnWidth(option.width)
+        headColumn.style.width = this._parseColumnWidth(option.width)
 
         headRow.appendChild(headColumn)
 
@@ -63,6 +66,7 @@ export default class GridTable {
         if(!option.resizable){
             return headColumn;
         }
+        let _SELF = this;
         let headColumnResize = document.createElement('div');
         headColumnResize.className = this.TABLE_CLASS_NAMES.head.resize;
         headColumnResize.addEventListener('mousedown', function(e){
@@ -79,6 +83,10 @@ export default class GridTable {
             function mousemove(e){
                 let targetWidth = Util.width(th);
                 th.style.width = `${targetWidth + e.movementX}px`;
+
+                _SELF.event.CALL_COLUMN_RESIZE(e, {
+                    ..._SELF._getIndex(headColumn)
+                })
             }
             function mouseup(e){
                 this.classList.remove('active');
@@ -99,29 +107,40 @@ export default class GridTable {
         if(!option.sortable){
             return headColumn;
         }
+        let _SELF = this
+
         let headColumnSort = document.createElement('div');
         headColumnSort.className = this.TABLE_CLASS_NAMES.head.sort;
 
         headColumn.setAttribute('sortable', '');
-        headColumn.addEventListener('click', function(sortElement){
+        headColumn.addEventListener('click', function(sortElement, e){
             let isAsc = sortElement.classList.contains('asc')
             let isDesc = sortElement.classList.contains('desc')
 
+            let sort;
             if(!isAsc && !isDesc){
                 sortElement.classList.remove('asc')
                 sortElement.classList.add('desc');
+                sort = 'desc';
             }else if(isDesc){
                 sortElement.classList.remove('desc');
                 sortElement.classList.add('asc');
+                sort = 'asc'
             }else{
                 sortElement.classList.remove('desc');
                 sortElement.classList.remove('asc')
+                sort = 'none'
             }
 
+            _SELF.event.CALL_SORT(e, {
+                sort : sort,
+                ..._SELF._getIndex(headColumn)
+            })
         }.bind(headColumn, headColumnSort))
         headColumn.appendChild(headColumnSort);
         return headColumn;
     }
+
     private _createHeadColumnTooltipable(headColumn:Element, option: GridOptionColumn, callback:Function){
         if(!option.tooltipable){
             return headColumn
@@ -166,7 +185,7 @@ export default class GridTable {
         thead.className = this.TABLE_CLASS_NAMES.head.this;
         tbody.className = this.TABLE_CLASS_NAMES.body.this;
 
-        table.addEventListener('click', function(e){
+        /*table.addEventListener('click', function(e){
             if(e.target instanceof Element){
                 let column = e.target;
                 let tagName = column.tagName;
@@ -180,7 +199,7 @@ export default class GridTable {
                 console.log(rowIndex, columnIndex)
                 this.ev
             }
-        }.bind(this))
+        }.bind(this))*/
 
         let rowIndex = -1;
         let headRow = this._createHeadRow(thead, this.options, rowIndex);
@@ -206,6 +225,7 @@ export default class GridTable {
     }
 
     public update(){
+        let _SELF = this;
         let tbody = this.element.querySelector('tbody');
         this.options.data.forEach((row, rowIndex) =>{
 
@@ -229,14 +249,18 @@ export default class GridTable {
                         + columnValue +
                         (columnOption.suffix ? columnOption.suffix : '')
                 }
-
+                bodyColumn.addEventListener('click', function(e){
+                    _SELF.event.CALL_GRID_CLICK(e, {
+                        ..._SELF._getIndex(this)
+                    })
+                }.bind(bodyColumn))
                 bodyRow.appendChild(bodyColumn)
             })
             tbody.appendChild(bodyRow);
         })
     }
 
-    private parseColumnWidth(width){
+    private _parseColumnWidth(width){
         if(!width){
             return 'auto'
         }
@@ -250,6 +274,13 @@ export default class GridTable {
             return width;
         }else{
             throw new Error('unsupported width data type')
+        }
+    }
+
+    private _getIndex(columnElement){
+        return {
+            rowIndex: Number(columnElement.closest('tr').getAttribute(this.TABLE_DATA_NAMES.row.index)),
+            columnIndex: Number(columnElement.getAttribute(this.TABLE_DATA_NAMES.column.index))
         }
     }
 }
