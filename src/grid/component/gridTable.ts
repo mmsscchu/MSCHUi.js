@@ -27,6 +27,12 @@ export default class GridTable {
     }
     private options: GridOptions;
     private event : GridEvent;
+    private data = {
+        rowIndex : -1,
+        columnIndex : -1,
+        target: null,
+        cell: null
+    }
     public element;
 
     constructor(gridOptions : GridOptions, gridEvent: GridEvent) {
@@ -73,6 +79,8 @@ export default class GridTable {
             this.style.height = `${Util.height(headColumn.closest('table'))}px`
             this.classList.add('active');
 
+            _SELF.event.CALL_COLUMN_RESIZE_START(e, _SELF._applyData({}))
+
             let th = this.closest('th');
             // @ts-ignore
             th.nextElementSibling.style.width = 'auto';
@@ -84,14 +92,14 @@ export default class GridTable {
                 let targetWidth = Util.width(th);
                 th.style.width = `${targetWidth + e.movementX}px`;
 
-                _SELF.event.CALL_COLUMN_RESIZE(e, {
-                    ..._SELF._getIndex(headColumn)
-                })
+                _SELF.event.CALL_COLUMN_RESIZE(e, _SELF._applyData({}))
             }
             function mouseup(e){
                 this.classList.remove('active');
                 // @ts-ignore
                 th.nextElementSibling.style.width = `${Util.width(th.nextElementSibling)}px`
+
+                _SELF.event.CALL_COLUMN_RESIZE_STOP(e, _SELF._applyData({}))
 
                 document.removeEventListener('mousemove', mousemove)
                 document.removeEventListener('mouseup', mouseup.bind(this))
@@ -131,11 +139,9 @@ export default class GridTable {
                 sortElement.classList.remove('asc')
                 sort = 'none'
             }
-
-            _SELF.event.CALL_SORT(e, {
-                sort : sort,
-                ..._SELF._getIndex(headColumn)
-            })
+            _SELF.event.CALL_SORT(e, _SELF._applyData({
+                sort : sort
+            }))
         }.bind(headColumn, headColumnSort))
         headColumn.appendChild(headColumnSort);
         return headColumn;
@@ -145,27 +151,37 @@ export default class GridTable {
         if(!option.tooltipable){
             return headColumn
         }
+        let _SELF = this;
         let headColumnTooltip = document.createElement('div');
         headColumnTooltip.className = this.TABLE_CLASS_NAMES.head.tooltip;
         headColumnTooltip.innerText = option.tooltip ? option.tooltip : option.title;
 
-        headColumn.addEventListener('mouseenter', function(tooltipElement){ // caption 발동 조건
+        headColumn.addEventListener('mouseenter', function(tooltipElement, e){ // caption 발동 조건
             let enterLimitTime = 500;
             let enterWaitTime = 0;
             let enterWaitInterval = setInterval(()=>{
                 if(enterLimitTime < enterWaitTime){
                     tooltipElement.classList.add('active')
+
+                    _SELF.event.CALL_TOOLTIP_ACTIVE(e, _SELF._applyData({}))
+
                     clearInterval(enterWaitInterval);
                 }
                 enterWaitTime += 50;
             },50)
+
             this.addEventListener('mouseleave', mouseleave)
 
-            function mouseleave(){
+            _SELF.event.CALL_TOOLTIP_READY(e, _SELF._applyData({}))
+
+            function mouseleave(e){
+                tooltipElement.classList.remove('active')
+                this.removeEventListener('mouseleave', mouseleave);
+
+                _SELF.event.CALL_TOOLTIP_INACTIVE(e, _SELF._applyData({}))
+
                 if(enterWaitInterval){
-                    tooltipElement.classList.remove('active')
                     clearInterval(enterWaitInterval);
-                    this.removeEventListener('mouseleave', mouseleave);
                 }
             }
         }.bind(headColumn, headColumnTooltip))
@@ -185,21 +201,23 @@ export default class GridTable {
         thead.className = this.TABLE_CLASS_NAMES.head.this;
         tbody.className = this.TABLE_CLASS_NAMES.body.this;
 
-        /*table.addEventListener('click', function(e){
+        table.addEventListener('click', function(e){
             if(e.target instanceof Element){
                 let column = e.target;
                 let tagName = column.tagName;
                 if(!(tagName === 'th' || tagName === 'td')){
-                    column = column.closest('th,td')
+                    column = column.closest('th, td')
                 }
                 let row = column.closest('tr')
                 let rowIndex = row.getAttribute(this.TABLE_DATA_NAMES.row.index)
                 let columnIndex = column.getAttribute(this.TABLE_DATA_NAMES.column.index);
 
-                console.log(rowIndex, columnIndex)
-                this.ev
+                this.data.rowIndex = rowIndex;
+                this.data.columnIndex = columnIndex
+                this.data.target = e.target
+                this.data.cell = column
             }
-        }.bind(this))*/
+        }.bind(this))
 
         let rowIndex = -1;
         let headRow = this._createHeadRow(thead, this.options, rowIndex);
@@ -250,9 +268,7 @@ export default class GridTable {
                         (columnOption.suffix ? columnOption.suffix : '')
                 }
                 bodyColumn.addEventListener('click', function(e){
-                    _SELF.event.CALL_GRID_CLICK(e, {
-                        ..._SELF._getIndex(this)
-                    })
+                    _SELF.event.CALL_GRID_CLICK(e, _SELF._applyData({}))
                 }.bind(bodyColumn))
                 bodyRow.appendChild(bodyColumn)
             })
@@ -277,10 +293,13 @@ export default class GridTable {
         }
     }
 
-    private _getIndex(columnElement){
+    /*private _getIndex(columnElement){
         return {
             rowIndex: Number(columnElement.closest('tr').getAttribute(this.TABLE_DATA_NAMES.row.index)),
             columnIndex: Number(columnElement.getAttribute(this.TABLE_DATA_NAMES.column.index))
         }
+    }*/
+    private _applyData(data = {}){
+        return Object.assign(this.data, data)
     }
 }
