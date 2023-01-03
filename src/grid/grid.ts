@@ -105,10 +105,12 @@ export default class Grid{
 
 
     public destroy(){
-        let fragment = document.createDocumentFragment();
+
     }
 
-    public refresh(){}
+    public refresh(){
+
+    }
 
     private createRow(){}
     private createColumn(){}
@@ -116,7 +118,6 @@ export default class Grid{
     private updateRow(){}
     private updateColumn(){}
 
-    getGrids(){}
 
     public setOptions(options: GridOptions){
         for(let optionKey in options){

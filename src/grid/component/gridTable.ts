@@ -31,7 +31,8 @@ export default class GridTable {
         rowIndex : -1,
         columnIndex : -1,
         target: null,
-        cell: null
+        cell: null,
+        value : null
     }
     public element;
 
@@ -83,26 +84,37 @@ export default class GridTable {
 
             let th = this.closest('th');
             // @ts-ignore
-            th.nextElementSibling.style.width = 'auto';
-
+            //th.nextElementSibling.style.width = 'auto';
+            //document.addEventListener('selectstart', selectstart)
             document.addEventListener('mousemove', mousemove)
             document.addEventListener('mouseup', mouseup.bind(this));
 
+            document.ondragstart = function(){
+                return false;
+            }
+            function selectstart(e){
+                e.preventDefault();
+                return false;
+            }
             function mousemove(e){
                 let targetWidth = Util.width(th);
                 th.style.width = `${targetWidth + e.movementX}px`;
+
+                headColumnResize.style.height = `${Util.height(headColumn.closest('table'))}px`
 
                 _SELF.event.CALL_COLUMN_RESIZE(e, _SELF._applyData({}))
             }
             function mouseup(e){
                 this.classList.remove('active');
+                this.removeAttribute('style');
                 // @ts-ignore
-                th.nextElementSibling.style.width = `${Util.width(th.nextElementSibling)}px`
+                //th.nextElementSibling.style.width = `${Util.width(th.nextElementSibling)}px`
 
                 _SELF.event.CALL_COLUMN_RESIZE_STOP(e, _SELF._applyData({}))
 
                 document.removeEventListener('mousemove', mousemove)
                 document.removeEventListener('mouseup', mouseup.bind(this))
+                document.removeEventListener('selectstart', selectstart)
             }
         })
 
@@ -192,7 +204,7 @@ export default class GridTable {
         return headColumn;
     }
     public create(){
-        let area = document.createElement('div');
+        let area = this.element = document.createElement('div');
         let table = document.createElement('table');
         let thead = document.createElement('thead');
         let tbody = document.createElement('tbody');
@@ -216,6 +228,7 @@ export default class GridTable {
                 this.data.columnIndex = columnIndex
                 this.data.target = e.target
                 this.data.cell = column
+                this.data.value = column.innerText
             }
         }.bind(this))
 
@@ -223,15 +236,29 @@ export default class GridTable {
         let headRow = this._createHeadRow(thead, this.options, rowIndex);
 
         /* options.columns */
+        let hasWidthCount = 0;
+        let totalWidth = 0;
         this.options.columns.forEach((columnOption, columnIndex) => {
+
             let headColumn = this._createHeadColumn(headRow, columnOption, columnIndex)
 
             this._createHeadColumnTitle(headColumn, columnOption, function(){})
             this._createHeadColumnResizable(headColumn, columnOption, function(){})
             this._createHeadColumnSortable(headColumn, columnOption, function(){})
             this._createHeadColumnTooltipable(headColumn, columnOption, function(){})
+
+            if(columnOption.width && typeof columnOption.width ==='number'){
+                hasWidthCount++;
+                totalWidth+= columnOption.width
+            }
         })
 
+        if(hasWidthCount === this.options.columns.length){
+            area.style.width = totalWidth + 'px'
+            //table.style.width = getComputedStyle()
+            /*// @ts-ignore
+            headRow.lastElementChild.style.width = 'auto'*/
+        }
         thead.appendChild(headRow);
 
         table.appendChild(thead)
@@ -239,7 +266,6 @@ export default class GridTable {
 
         area.appendChild(table);
 
-        this.element = area;
     }
 
     public update(){
@@ -267,6 +293,8 @@ export default class GridTable {
                         + columnValue +
                         (columnOption.suffix ? columnOption.suffix : '')
                 }
+
+
                 bodyColumn.addEventListener('click', function(e){
                     _SELF.event.CALL_GRID_CLICK(e, _SELF._applyData({}))
                 }.bind(bodyColumn))
@@ -284,8 +312,9 @@ export default class GridTable {
             return width + 'px'
         }else if(typeof width === 'string'){
             if(width.includes('%')){
-                /*let tableWidth = Number(getComputedStyle(table).getPropertyValue('width').replace('px'));
-                tableWidth*/
+               /* let containerWidth = Util.width(this.element)
+                let percent = Number(width.replace('%', ''))
+                width = (containerWidth * (percent / 100)) + 'px'*/
             }
             return width;
         }else{

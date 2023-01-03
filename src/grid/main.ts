@@ -24,7 +24,7 @@ export default class MSCHUiGrid{
     constructor() {
 
     }
-    create(container: string | Element, options? : GridOptions){
+    public create(container: string | Element, options? : GridOptions){
         options = Object.assign(this._defaultOptions, options);
         options = this.requireOptionCheck(container, options);
 
